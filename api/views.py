@@ -37,7 +37,12 @@ class PetitionListView(APIView):
             petitions = petitions.filter(category = category)
 
         if creator is not None:
-            petitions = petitions.filter(creator = creator)
+            creator = creator.lower()
+            names = dict()
+            for user in User.objects.all():
+                names[user.get_full_name()] = user.id
+            ids = [value for key, value in names.items() if creator in key.lower()]
+            petitions = petitions.filter(creator_id__in=ids)
 
         if successful == "True":
             for petition in petitions:
