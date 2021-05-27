@@ -6,7 +6,17 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from .models import Category, Petition
-from .serializers import CategoryListSerializer, PetitionListSerializer, PetitionCreateSerializer, PetitionDetailSerializer, UserListSerializer
+from .serializers import CategoryListSerializer, PetitionListSerializer, PetitionCreateSerializer, PetitionDetailSerializer, UserListSerializer, LogoutSerializer
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(status=204)
 
 class CategoryListView(APIView):
 
@@ -25,19 +35,18 @@ class PetitionListView(APIView):
         petitions = Petition.objects.all()
         if category is not None:
             petitions = petitions.filter(category = category)
+
         if creator is not None:
             petitions = petitions.filter(creator = creator)
-        if successful is not None:
-            if successful == "True":
-                for petition in petitions:
-                    if not petition.HasPassed():
-                        petitions = petitions.exclude(id = petition.id)
-            else:
-                for petition in petitions:
-                    
-                    if not (petition.IsExpired() and not petition.HasPassed()):
-                        petitions = petitions.exclude(id = petition.id)
-                        
+
+        if successful == "True":
+            for petition in petitions:
+                if not petition.HasPassed():
+                    petitions = petitions.exclude(id = petition.id)
+        elif successful == "False":
+            for petition in petitions:
+                if not (petition.IsExpired() and not petition.HasPassed()):
+                    petitions = petitions.exclude(id = petition.id)          
         
         serializer = PetitionListSerializer(petitions, many=True)
         return Response(serializer.data)
@@ -47,6 +56,7 @@ class PetitionCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+        request.data['creator'] = request.user.id
         petition = PetitionCreateSerializer(data=request.data)
         if petition.is_valid():
             petition.save()

@@ -143,7 +143,9 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'SOCIAL_AUTH_TOKEN_STRATEGY': 'djoser.social.token.jwt.TokenStrategy',
     'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': ['http://localhost:8000',],
-    'SERIALIZERS' : {}
+    'SERIALIZERS' : {
+        'user_create': 'api.serializers.UserRegisterSerializer'
+    }
 }
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '651324120148-b7krj29ds89vv93n73fpt7hgtcen4llr.apps.googleusercontent.com'

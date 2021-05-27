@@ -1,7 +1,28 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from djoser.serializers import UserCreateSerializer
 
 from .models import Category, Petition
+
+class UserRegisterSerializer(UserCreateSerializer):
+
+    class Meta(UserCreateSerializer.Meta):
+        fields = ["id", "username", "password", "first_name", "last_name", "email"]
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def validate(self, attrs):
+        self.token = attrs['refresh']
+        return attrs
+
+    def save(self, **kwargs):
+        try:
+            RefreshToken(self.token).blacklist()
+        except TokenError:
+            self.fail('bad token')
 
 class CategoryListSerializer(serializers.ModelSerializer):
 
@@ -35,7 +56,7 @@ class PetitionDetailSerializer(serializers.ModelSerializer):
     vote_count = serializers.SerializerMethodField()
 
     def get_creator_name(self, obj):
-        return f"{obj.creator.first_name} {obj.creator.last_name}"
+        return obj.creator.get_full_name()
 
     def get_datetime_expires(self, obj):
         return obj.DateExpires()
@@ -57,7 +78,7 @@ class UserListSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
 
     def get_full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
+        return obj.get_full_name()
 
     class Meta:
         model = User
