@@ -28,11 +28,17 @@ class CategoryListView(APIView):
 class PetitionListView(APIView):
 
     def get(self, request):
+        title = request.GET.get('title', None)
         category = request.GET.get('category', None)
         creator = request.GET.get('creator', None)
         successful = request.GET.get('successful', None)
-
+        
+        
         petitions = Petition.objects.all()
+
+        if title is not None:
+            petitions = petitions.filter(title__icontains=title)
+
         if category is not None:
             petitions = petitions.filter(category = category)
 
