@@ -74,7 +74,6 @@ class PetitionCreateView(APIView):
         return Response(status=201)
 
 class PetitionDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk):
         petition = Petition.objects.get(id=pk)
