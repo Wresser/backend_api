@@ -39,7 +39,7 @@ class PetitionListView(APIView):
         if title is not None:
             petitions = petitions.filter(title__icontains=title)
 
-        if category is not None:
+        if category is not None and category != "" and category !="null":
             petitions = petitions.filter(category = category)
 
         if creator is not None:
