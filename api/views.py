@@ -108,3 +108,10 @@ class StatisticsView(APIView):
             vote_num += petition.VoteCount()
 
         return Response({'petitions_number': pet_num, 'vote_number' : vote_num})
+
+class VotedUsersView(APIView):
+
+    def get(self, request, pk):
+        petition = Petition.objects.get(id=pk)
+        serializer = UserListSerializer(petition.voters, many=True)
+        return Response(serializer.data)
