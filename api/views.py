@@ -50,14 +50,17 @@ class PetitionListView(APIView):
             ids = [value for key, value in names.items() if creator in key.lower()]
             petitions = petitions.filter(creator_id__in=ids)
 
-        if successful == "True":
-            for petition in petitions:
-                if not petition.HasPassed():
-                    petitions = petitions.exclude(id = petition.id)
-        elif successful == "False":
-            for petition in petitions:
-                if not (petition.IsExpired() and not petition.HasPassed()):
-                    petitions = petitions.exclude(id = petition.id)          
+        if successful is not None:
+            successful = successful.lower()
+
+            if successful == "true":
+                for petition in petitions:
+                    if not petition.HasPassed():
+                        petitions = petitions.exclude(id = petition.id)
+            elif successful == "false":
+                for petition in petitions:
+                    if not (petition.IsExpired() and not petition.HasPassed()):
+                        petitions = petitions.exclude(id = petition.id)          
         
         serializer = PetitionListSerializer(petitions, many=True)
         return Response(serializer.data)
